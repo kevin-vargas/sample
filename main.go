@@ -17,6 +17,7 @@ func Health(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+
 	http.HandleFunc("/", HelloServer)
 	http.HandleFunc("/health", Health)
 	err := http.ListenAndServe(":8080", nil)
