@@ -42,3 +42,59 @@ spec:
       targetPort: 8080
   type: LoadBalancer
 ---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: sample
+  namespace: test
+spec:
+  secretName: sample-fast-ar-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - sample.fast.ar
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sample-registry-ingress-secure
+  namespace: test
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`sample.fast.ar`)
+    kind: Rule
+    services:
+    - name: sample-service
+      port: 8080
+  tls:
+    secretName: sample-fast-ar-tls
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sample-registry-ingress
+  namespace: test
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`sample.fast.ar`)
+    kind: Rule
+    services:
+    - name: sample-service
+      port: 8080
+    middlewares:
+    - name: https-redirect
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: https-redirect
+  namespace: test
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
