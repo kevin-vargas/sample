@@ -1,4 +1,4 @@
-name: cd
+name: publish
 
 on:
   push:
@@ -10,8 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     env:
-      DOCKER_REGISTRY: registry.cloud.okteto.net
-      IMAGE_NAME: registry.cloud.okteto.net/kevin-vargas/sample:latest
+      DOCKER_REGISTRY: docker.fast.ar
+      IMAGE_NAME: docker.fast.ar/sample:latest
       PLATFORMS: linux/amd64,linux/arm64
     steps:
       - uses: actions/checkout@v2
@@ -33,3 +33,18 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+  deploy:
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-hub/kubectl@master
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        with:
+          args: apply -f publish/deployment.yaml
+      - uses: actions-hub/kubectl@master
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        with:
+          args: rollout restart deployment sample -n test
