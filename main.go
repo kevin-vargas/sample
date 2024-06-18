@@ -9,7 +9,7 @@ import (
 
 func HelloServer(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("This is an example server.\n"))
+	w.Write([]byte("This is an example server. 18/06/2024\n"))
 }
 
 func Health(w http.ResponseWriter, req *http.Request) {
